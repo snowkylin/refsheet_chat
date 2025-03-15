@@ -5,6 +5,7 @@ import torch
 from threading import Thread
 import requests
 import json
+import os
 import base64
 from openai import OpenAI
 
@@ -104,6 +105,8 @@ def generate(history, engine, base_url, api_model, api_key):
                         data = base64.b64encode(image_file.read()).decode("utf-8")
                     item_i['image_url'] = {'url': 'data:image/jpeg;base64,' + data}
                     del item_i['url']
+        if base_url == default_base_url and api_model == default_api_model and api_key == "":
+            api_key = os.environ['OPENROUTER_TOKEN']
         client = OpenAI(base_url=base_url, api_key=api_key)
         stream = client.chat.completions.create(
             model=api_model,
@@ -146,7 +149,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
         confirm_btn = gr.Button(_("confirm"), render=False)
         chatbot = gr.Chatbot(height=600, type='messages', label=_("chatbox"), render=False)
         engine = gr.Radio([(_('local'), 'local'), ('API', 'api')],
-                        value='local', label=_("method"), render=False, interactive=True)
+                        value='api', label=_("method"), render=False, interactive=True)
         base_url = gr.Textbox(label=_("base_url"), render=False, value=default_base_url)
         api_model = gr.Textbox(label=_("api_model"), render=False, value=default_api_model)
         api_key = gr.Textbox(label=_("api_key"), render=False)
