@@ -1,3 +1,16 @@
+---
+title: Refsheet Chat
+emoji: 📉
+colorFrom: gray
+colorTo: green
+sdk: gradio
+sdk_version: 5.21.0
+app_file: app.py
+pinned: false
+license: mit
+short_description: Chat with a character via reference sheet!
+---
+
 # Chat with Reference Sheet
 
 A demo of [Gemma 3](https://blog.google/technology/developers/gemma-3/), demonstrating its excellent vision and multilingual capability.
