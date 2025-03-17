@@ -34,6 +34,7 @@ lang_store = {
         "confirm": "Confirm",
         "default_description": "",
         "additional_description": "Character description (optional)",
+        "description_placeholder": "Information that is not shown in the reference sheet, such as the character's name, personality, past stories and habit of saying.",
         "more_imgs": "More reference images of the character (optional)",
         "title": "<h1>Chat with a character via reference sheet!</h1>>",
         "powered_by_gemma": "<p>Powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p",
@@ -54,6 +55,7 @@ lang_store = {
         "confirm": "确认",
         "default_description": "",
         "additional_description": "角色描述（可选）",
+        "description_placeholder": "未在设定图中包含的角色信息，如角色名称、性格、言语习惯、过往经历等。",
         "more_imgs": "更多角色参考图（可选，可上传多张）",
         "title": "<h1>与设定图中的角色聊天！</h1>",
         "powered_by_gemma": "<p>由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>",
@@ -165,7 +167,12 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
     with Translate(lang_store) as lang:
         gr.HTML(_("title"))
         img = gr.Image(type="filepath", value=default_img, label=_("upload"), render=False)
-        description = gr.TextArea(value=_("default_description"), label=_("additional_description"), render=False)
+        description = gr.TextArea(
+            value=_("default_description"),
+            label=_("additional_description"),
+            placeholder=_("description_placeholder"),
+            render=False
+        )
         more_imgs = gr.Files(
             label=_("more_imgs"),
             file_types=["image"],
