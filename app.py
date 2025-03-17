@@ -12,22 +12,36 @@ import base64
 from openai import OpenAI
 
 default_img = None
+default_engine = "api"
 default_base_url = "https://openrouter.ai/api/v1"
 default_api_model = "google/gemma-3-27b-it"
 
 model_id = "google/gemma-3-4b-it"
+huggingface_spaces = "HUGGINGFACE_SPACES" in os.environ and os.environ['HUGGINGFACE_SPACES'] == "1"
+local = "local" in os.environ and os.environ['LOCAL'] == "1"
 
-model = Gemma3ForConditionalGeneration.from_pretrained(
-    model_id, device_map="auto"
-).eval()
+if huggingface_spaces or local:
+    model = Gemma3ForConditionalGeneration.from_pretrained(
+        model_id, device_map="auto"
+    ).eval()
 
-processor = AutoProcessor.from_pretrained(model_id)
+    processor = AutoProcessor.from_pretrained(model_id)
 
 generate_kwargs = {
     'max_new_tokens': 1000,
     'do_sample': True,
     'temperature': 1.0
 }
+
+analytics_code = """<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-48LQ5P3NNR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-48LQ5P3NNR');
+</script>"""
 
 lang_store = {
     "und": {
@@ -36,7 +50,7 @@ lang_store = {
         "additional_description": "Character description (optional)",
         "description_placeholder": "Information that is not shown in the reference sheet, such as the character's name, personality, past stories and habit of saying.",
         "more_imgs": "More reference images of the character (optional)",
-        "title": "<h1>Chat with a character via reference sheet!</h1>",
+        "title": """# RefSheet Chat -- Chat with a character via reference sheet!""",
         "powered_by_gemma": "<p>Powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p>",
         "upload": "Upload the reference sheet of your character here",
         "prompt": "You are the character in the image, use %s. Use a conversational, oral tone. Do not mention the reference images directly. Start without confirmation.",
@@ -69,7 +83,7 @@ lang_store = {
         "additional_description": "角色描述（可选）",
         "description_placeholder": "未在设定图中包含的角色信息，如角色姓名、性格、言语习惯、过往经历等。",
         "more_imgs": "更多角色参考图（可选，可上传多张）",
-        "title": "<h1>与设定图中的角色聊天！</h1>",
+        "title": """# RefSheet Chat——与设定图中的角色聊天！""",
         "powered_by_gemma": "<p>由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>",
         "upload": "在这里上传角色设定图",
         "prompt": "你的身份是图中的角色，使用%s。使用聊天的，口语化的方式表达。不在回复中直接提及参考图。无需确认。",
@@ -196,7 +210,7 @@ def set_default_character_language(request: gr.Request):
 
 with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
     with Translate(lang_store) as lang:
-        gr.HTML(_("title"))
+        gr.Markdown(_("title"))
         img = gr.Image(type="filepath", value=default_img, label=_("upload"), render=False)
         description = gr.TextArea(
             value=_("default_description"),
@@ -233,7 +247,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                 (_("local"), "local"),
                 (_("API"), "api")
             ],
-            value='api',
+            value=default_engine,
             label=_("method"),
             render=False,
             interactive=True
@@ -244,16 +258,30 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
         with gr.Row():
             with gr.Column(scale=4):
                 img.render()
-                with gr.Tab(_("description")):
+                if local or huggingface_spaces:
+                    with gr.Tab(_("description")):
+                        description.render()
+                        character_language.render()
+                        more_imgs.render()
+                        confirm_btn.render()
+                    with gr.Tab(_("more_options")):
+                        engine.render()
+                        base_url.render()
+                        api_model.render()
+                        api_key.render()
+                else:
                     description.render()
                     character_language.render()
                     more_imgs.render()
-                with gr.Tab(_("more_options")):
+                    confirm_btn.render()
+                    engine.visible = False
+                    base_url.visible = False
+                    api_model.visible = False
+                    api_key.visible = False
                     engine.render()
                     base_url.render()
                     api_model.render()
                     api_key.render()
-                confirm_btn.render()
             with gr.Column(scale=6):
                 chat = gr.ChatInterface(
                     response,
@@ -263,6 +291,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                 )
         confirm_btn.click(prefill_chatbot, [img, description, more_imgs, character_language, engine, base_url, api_model, api_key], chat.chatbot)\
             .then(lambda x: x, chat.chatbot, chat.chatbot_value)
+        gr.HTML(analytics_code)
     demo.load(set_default_character_language, None, character_language)
 
 
