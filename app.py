@@ -17,11 +17,11 @@ default_api_model = "google/gemma-3-27b-it"
 
 model_id = "google/gemma-3-4b-it"
 
-# model = Gemma3ForConditionalGeneration.from_pretrained(
-#     model_id, device_map="auto"
-# ).eval()
-#
-# processor = AutoProcessor.from_pretrained(model_id)
+model = Gemma3ForConditionalGeneration.from_pretrained(
+    model_id, device_map="auto"
+).eval()
+
+processor = AutoProcessor.from_pretrained(model_id)
 
 generate_kwargs = {
     'max_new_tokens': 1000,
