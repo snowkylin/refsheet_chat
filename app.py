@@ -17,11 +17,11 @@ default_api_model = "google/gemma-3-27b-it"
 
 model_id = "google/gemma-3-4b-it"
 
-model = Gemma3ForConditionalGeneration.from_pretrained(
-    model_id, device_map="auto"
-).eval()
-
-processor = AutoProcessor.from_pretrained(model_id)
+# model = Gemma3ForConditionalGeneration.from_pretrained(
+#     model_id, device_map="auto"
+# ).eval()
+#
+# processor = AutoProcessor.from_pretrained(model_id)
 
 generate_kwargs = {
     'max_new_tokens': 1000,
@@ -36,10 +36,10 @@ lang_store = {
         "additional_description": "Character description (optional)",
         "description_placeholder": "Information that is not shown in the reference sheet, such as the character's name, personality, past stories and habit of saying.",
         "more_imgs": "More reference images of the character (optional)",
-        "title": "<h1>Chat with a character via reference sheet!</h1>>",
-        "powered_by_gemma": "<p>Powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p",
+        "title": "<h1>Chat with a character via reference sheet!</h1>",
+        "powered_by_gemma": "<p>Powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p>",
         "upload": "Upload the reference sheet of your character here",
-        "prompt": "You are the character in the image. Do not include list in response unless requested. Do not mention the reference images. Start without confirmation.",
+        "prompt": "You are the character in the image, use %s. Do not include list in response unless requested. Do not mention the reference images. Start without confirmation.",
         "additional_info_prompt": "Additional info: ",
         "additional_reference_images_prompt": "Additional reference images of the character:",
         "description": "Description",
@@ -49,18 +49,30 @@ lang_store = {
         "api_model": "API Model",
         "api_key": "API Key",
         "local": "Local",
-        "chatbox": "Chat Box"
+        "chatbox": "Chat Box",
+        "character_language": "The language used by the character",
+        "en": "English",
+        "zh": "Simplified Chinese",
+        "zh-Hant": "Traditional Chinese",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "fr": "French",
+        "de": "German",
+        "es": "Spanish",
+        "ru": "Russian",
+        "ar": "Arabic",
+        "default_language": "en",
     },
     "zh": {
         "confirm": "确认",
         "default_description": "",
         "additional_description": "角色描述（可选）",
-        "description_placeholder": "未在设定图中包含的角色信息，如角色名称、性格、言语习惯、过往经历等。",
+        "description_placeholder": "未在设定图中包含的角色信息，如角色姓名、性格、言语习惯、过往经历等。",
         "more_imgs": "更多角色参考图（可选，可上传多张）",
         "title": "<h1>与设定图中的角色聊天！</h1>",
         "powered_by_gemma": "<p>由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>",
         "upload": "在这里上传角色设定图",
-        "prompt": "你的身份是图中的角色，使用中文。除非对方要求，否则不在回复中使用列表。不在回复中提及参考图。无需确认。",
+        "prompt": "你的身份是图中的角色，使用%s。除非对方要求，否则不在回复中使用列表。不在回复中提及参考图。无需确认。",
         "additional_info_prompt": "补充信息：",
         "additional_reference_images_prompt": "该角色的更多参考图：",
         "description": "角色描述",
@@ -70,7 +82,19 @@ lang_store = {
         "api_model": "API 模型",
         "api_key": "API Key",
         "local": "本地",
-        "chatbox": "聊天窗口"
+        "chatbox": "聊天窗口",
+        "character_language": "角色聊天所用语言",
+        "en": "英语",
+        "zh": "简体中文",
+        "zh-Hant": "繁体中文",
+        "ja": "日语",
+        "ko": "韩语",
+        "fr": "法语",
+        "de": "德语",
+        "es": "西班牙语",
+        "ru": "俄语",
+        "ar": "阿拉伯语",
+        "default_language": "zh",
     },
 }
 
@@ -83,8 +107,8 @@ def encode_img(filepath, thumbnail=(896, 896)):
     encoded_img = "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode("utf-8")
     return encoded_img
 
-def get_init_prompt(img, description, more_imgs):
-    prompt = _("prompt")
+def get_init_prompt(img, description, more_imgs, character_language):
+    prompt = _("prompt") % _(character_language)
     if description != "":
         prompt += "\n" + _("additional_info_prompt") + description
     if more_imgs is None:
@@ -144,8 +168,8 @@ def generate(history, engine, base_url, api_model, api_key):
                 yield collected_text
 
 
-def prefill_chatbot(img, description, more_imgs, engine, base_url, api_model, api_key):
-    history = get_init_prompt(img, description, more_imgs)
+def prefill_chatbot(img, description, more_imgs, character_language, engine, base_url, api_model, api_key):
+    history = get_init_prompt(img, description, more_imgs, character_language)
 
     ret = [{'role': 'assistant', 'content': ""}]
     for generated_text in generate(history, engine, base_url, api_model, api_key):
@@ -153,14 +177,21 @@ def prefill_chatbot(img, description, more_imgs, engine, base_url, api_model, ap
         yield ret
 
 
-def response(message, history: list, img, description, more_imgs, engine, base_url, api_model, api_key):
+def response(message, history: list, img, description, more_imgs, character_language, engine, base_url, api_model, api_key):
     history = [{"role": item["role"], "content": [{"type": "text", "text": item["content"]}]} for item in history]
-    history = get_init_prompt(img, description, more_imgs) + history
+    history = get_init_prompt(img, description, more_imgs, character_language) + history
     history.append(
         {"role": "user", "content": [{"type": "text", "text": message}]}
     )
     for generated_text in generate(history, engine, base_url, api_model, api_key):
         yield generated_text
+
+def set_default_character_language(request: gr.Request):
+    if request.headers["Accept-Language"].split(",")[0].lower().startswith("zh"):
+        default_language = lang_store['zh']['default_language']
+    else:
+        default_language = lang_store['und']['default_language']
+    return gr.update(value=default_language)
 
 
 with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
@@ -173,6 +204,23 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
             placeholder=_("description_placeholder"),
             render=False
         )
+        character_language = gr.Dropdown(
+            choices=[
+                (_("en"), "en"),
+                (_("zh"), "zh"),
+                (_("zh-Hant"), "zh-Hant"),
+                (_("ja"), "ja"),
+                (_("ko"), "ko"),
+                (_("fr"), "fr"),
+                (_("de"), "de"),
+                (_("es"), "es"),
+                (_("ru"), "ru"),
+                (_("ar"), "ar"),
+            ],
+            label=_("character_language"),
+            render=False,
+            interactive = True
+        )
         more_imgs = gr.Files(
             label=_("more_imgs"),
             file_types=["image"],
@@ -180,8 +228,16 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
         )
         confirm_btn = gr.Button(_("confirm"), render=False)
         chatbot = gr.Chatbot(height=600, type='messages', label=_("chatbox"), render=False)
-        engine = gr.Radio([(_('local'), 'local'), ('API', 'api')],
-                        value='api', label=_("method"), render=False, interactive=True)
+        engine = gr.Radio(
+            choices=[
+                (_("local"), "local"),
+                (_("API"), "api")
+            ],
+            value='api',
+            label=_("method"),
+            render=False,
+            interactive=True
+        )
         base_url = gr.Textbox(label=_("base_url"), render=False, value=default_base_url)
         api_model = gr.Textbox(label=_("api_model"), render=False, value=default_api_model)
         api_key = gr.Textbox(label=_("api_key"), render=False)
@@ -190,6 +246,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                 img.render()
                 with gr.Tab(_("description")):
                     description.render()
+                    character_language.render()
                     more_imgs.render()
                 with gr.Tab(_("more_options")):
                     engine.render()
@@ -202,10 +259,11 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                     response,
                     chatbot=chatbot,
                     type="messages",
-                    additional_inputs=[img, description, more_imgs, engine, base_url, api_model, api_key],
+                    additional_inputs=[img, description, more_imgs, character_language, engine, base_url, api_model, api_key],
                 )
-        confirm_btn.click(prefill_chatbot, [img, description, more_imgs, engine, base_url, api_model, api_key], chat.chatbot)\
+        confirm_btn.click(prefill_chatbot, [img, description, more_imgs, character_language, engine, base_url, api_model, api_key], chat.chatbot)\
             .then(lambda x: x, chat.chatbot, chat.chatbot_value)
+    demo.load(set_default_character_language, None, character_language)
 
 
 if __name__ == "__main__":
