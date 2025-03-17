@@ -1,10 +1,5 @@
 import gradio as gr
 from gradio_i18n import Translate, gettext as _
-from transformers import AutoProcessor, Gemma3ForConditionalGeneration, TextIteratorStreamer
-import torch
-from threading import Thread
-import requests
-import json
 import io
 from PIL import Image
 import os
@@ -21,6 +16,9 @@ huggingface_spaces = "HUGGINGFACE_SPACES" in os.environ and os.environ['HUGGINGF
 local = "local" in os.environ and os.environ['LOCAL'] == "1"
 
 if huggingface_spaces or local:
+    from transformers import AutoProcessor, Gemma3ForConditionalGeneration, TextIteratorStreamer
+    import torch
+    from threading import Thread
     model = Gemma3ForConditionalGeneration.from_pretrained(
         model_id, device_map="auto"
     ).eval()
@@ -51,8 +49,7 @@ lang_store = {
         "description_placeholder": "Information that is not shown in the reference sheet, such as the character's name, personality, past stories and habit of saying.",
         "more_imgs": "More reference images of the character (optional)",
         "title": """# RefSheet Chat -- Chat with a character via reference sheet!""",
-        "powered_by_gemma": "<p>Powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p>",
-        "upload": "Upload the reference sheet of your character here",
+        "upload": "Upload the reference sheet of the character here",
         "prompt": "You are the character in the image, use %s. Use a conversational, oral tone. Do not mention the reference images directly. Start without confirmation.",
         "additional_info_prompt": "Additional info: ",
         "additional_reference_images_prompt": "Additional reference images of the character:",
@@ -76,6 +73,7 @@ lang_store = {
         "ru": "Russian",
         "ar": "Arabic",
         "default_language": "en",
+        "author": "<p align='center'>Developed by <a href='https://github.com/snowkylin'>snowkylin</a>, powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p>"
     },
     "zh": {
         "confirm": "确认",
@@ -84,7 +82,6 @@ lang_store = {
         "description_placeholder": "未在设定图中包含的角色信息，如角色姓名、性格、言语习惯、过往经历等。",
         "more_imgs": "更多角色参考图（可选，可上传多张）",
         "title": """# RefSheet Chat——与设定图中的角色聊天！""",
-        "powered_by_gemma": "<p>由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>",
         "upload": "在这里上传角色设定图",
         "prompt": "你的身份是图中的角色，使用%s。使用聊天的，口语化的方式表达。不在回复中直接提及参考图。无需确认。",
         "additional_info_prompt": "补充信息：",
@@ -109,6 +106,7 @@ lang_store = {
         "ru": "俄语",
         "ar": "阿拉伯语",
         "default_language": "zh",
+        "author": "<p align='center'>由 <a href='https://github.com/snowkylin'>snowkylin</a> 开发，由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>"
     },
 }
 
@@ -292,6 +290,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
         confirm_btn.click(prefill_chatbot, [img, description, more_imgs, character_language, engine, base_url, api_model, api_key], chat.chatbot)\
             .then(lambda x: x, chat.chatbot, chat.chatbot_value)
         gr.HTML(analytics_code)
+        gr.Markdown(_("author"))
     demo.load(set_default_character_language, None, character_language)
 
 
