@@ -13,7 +13,7 @@ default_api_model = "google/gemma-3-27b-it"
 
 model_id = "google/gemma-3-4b-it"
 huggingface_spaces = "HUGGINGFACE_SPACES" in os.environ and os.environ['HUGGINGFACE_SPACES'] == "1"
-local = "local" in os.environ and os.environ['LOCAL'] == "1"
+local = "LOCAL" in os.environ and os.environ['LOCAL'] == "1"
 
 if huggingface_spaces or local:
     from transformers import AutoProcessor, Gemma3ForConditionalGeneration, TextIteratorStreamer
@@ -47,8 +47,18 @@ lang_store = {
         "default_description": "",
         "additional_description": "Character description (optional)",
         "description_placeholder": "Information that is not shown in the reference sheet, such as the character's name, personality, past stories and habit of saying.",
+        "more_imgs_tab": "More reference images",
         "more_imgs": "More reference images of the character (optional)",
-        "title": """# RefSheet Chat -- Chat with a character via reference sheet!""",
+        "title": """
+<h1>RefSheet Chat -- Chat with a character via reference sheet!
+<span style='float: right'><iframe src="https://ghbtns.com/github-btn.html?user=snowkylin&repo=refsheet_chat&type=star&count=true" frameborder="0" scrolling="0" width="80" height="20" title="GitHub"></span></iframe>
+</h1>
+
+Upload a [reference sheet](https://www.google.com/search?q=reference+sheet+art) of a character, then RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character.
+
+You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The content you provide is only used for RefSheet Chat to understand the character and talk to you, and will not be used for other purposes. You can [run the program on your own computer](https://github.com/snowkylin/refsheet_chat) without Internet to ensure privacy.
+
+How will RefSheet Chat understand your character? Have a try!""",
         "upload": "Upload the reference sheet of the character here",
         "prompt": "You are the character in the image, use %s. Use a conversational, oral tone. Do not mention the reference images directly. Start without confirmation.",
         "additional_info_prompt": "Additional info: ",
@@ -73,20 +83,30 @@ lang_store = {
         "ru": "Russian",
         "ar": "Arabic",
         "default_language": "en",
-        "author": "<p align='center'>Developed by <a href='https://github.com/snowkylin'>snowkylin</a>, powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a></p>"
+        "author": "<p align='center'>Developed by <a href='https://github.com/snowkylin'>snowkylin</a>, powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> open model</p>"
     },
     "zh": {
         "confirm": "确认",
         "default_description": "",
-        "additional_description": "角色描述（可选）",
-        "description_placeholder": "未在设定图中包含的角色信息，如角色姓名、性格、言语习惯、过往经历等。",
-        "more_imgs": "更多角色参考图（可选，可上传多张）",
-        "title": """# RefSheet Chat——与设定图中的角色聊天！""",
+        "additional_description": "角色文字描述（可选）",
+        "description_placeholder": "未在设定图中包含的角色信息，可以包括角色姓名、性格、言语习惯、过往经历等。",
+        "more_imgs_tab": "额外角色参考图",
+        "more_imgs": "额外角色参考图（可选，可上传多张）",
+        "title": """
+<h1>RefSheet Chat——与设定图中的角色聊天！
+<span style='float: right'><iframe src="https://ghbtns.com/github-btn.html?user=snowkylin&repo=refsheet_chat&type=star&count=true" frameborder="0" scrolling="0" width="80" height="20" title="GitHub"></span></iframe>
+</h1>
+        
+“一图胜千言”——上传一张[角色设定图](https://www.bing.com/images/search?q=%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A%E5%9B%BE)（reference sheet），RefSheet Chat 即会理解和“脑补”设定图中的信息，并以这位角色的身份与您对话。
+
+您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您提供的内容仅用于 RefSheet Chat 理解角色并与您对话，不会另做他用。您可以[在自己的电脑上离线运行该程序](https://github.com/snowkylin/refsheet_chat)以确保隐私。
+
+RefSheet Chat 将如何理解您的角色呢？试试看！""",
         "upload": "在这里上传角色设定图",
         "prompt": "你的身份是图中的角色，使用%s。使用聊天的，口语化的方式表达。不在回复中直接提及参考图。无需确认。",
         "additional_info_prompt": "补充信息：",
         "additional_reference_images_prompt": "该角色的更多参考图：",
-        "description": "角色描述",
+        "description": "额外角色设定",
         "more_options": "更多选项",
         "method": "方法",
         "base_url": "API 地址",
@@ -106,7 +126,7 @@ lang_store = {
         "ru": "俄语",
         "ar": "阿拉伯语",
         "default_language": "zh",
-        "author": "<p align='center'>由 <a href='https://github.com/snowkylin'>snowkylin</a> 开发，由 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>"
+        "author": """<p align='center'>由 <a href='https://github.com/snowkylin'>snowkylin</a> 开发，由开源的 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>"""
     },
 }
 
@@ -208,7 +228,7 @@ def set_default_character_language(request: gr.Request):
 
 with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
     with Translate(lang_store) as lang:
-        gr.Markdown(_("title"))
+        gr.Markdown(_("title"), sanitize_html=False)
         img = gr.Image(type="filepath", value=default_img, label=_("upload"), render=False)
         description = gr.TextArea(
             value=_("default_description"),
@@ -238,7 +258,7 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
             file_types=["image"],
             render=False
         )
-        confirm_btn = gr.Button(_("confirm"), render=False)
+        confirm_btn = gr.Button(_("confirm"), render=False, variant='primary')
         chatbot = gr.Chatbot(height=600, type='messages', label=_("chatbox"), render=False)
         engine = gr.Radio(
             choices=[
@@ -256,22 +276,18 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
         with gr.Row():
             with gr.Column(scale=4):
                 img.render()
+                with gr.Tab(_("description")):
+                    description.render()
+                    character_language.render()
+                with gr.Tab(_("more_imgs_tab")):
+                    more_imgs.render()
                 if local or huggingface_spaces:
-                    with gr.Tab(_("description")):
-                        description.render()
-                        character_language.render()
-                        more_imgs.render()
-                        confirm_btn.render()
                     with gr.Tab(_("more_options")):
                         engine.render()
                         base_url.render()
                         api_model.render()
                         api_key.render()
                 else:
-                    description.render()
-                    character_language.render()
-                    more_imgs.render()
-                    confirm_btn.render()
                     engine.visible = False
                     base_url.visible = False
                     api_model.visible = False
@@ -280,6 +296,8 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                     base_url.render()
                     api_model.render()
                     api_key.render()
+
+                confirm_btn.render()
             with gr.Column(scale=6):
                 chat = gr.ChatInterface(
                     response,
