@@ -15,7 +15,7 @@ default_img = None
 default_engine = "local" if pyinstaller else "api"
 default_base_url = "https://openrouter.ai/api/v1"
 default_api_model = "google/gemma-3-27b-it"
-model_id = "models--google--gemma-3-4b-it/snapshots/dbd91bbaf64a0e591f4340ce8b66fd1dba9ab6bd" if pyinstaller else "google/gemma-3-4b-it"
+model_id = "google/gemma-3-4b-it"
 
 if huggingface_spaces or local or pyinstaller:
     from transformers import AutoProcessor, Gemma3ForConditionalGeneration, TextIteratorStreamer
@@ -58,7 +58,7 @@ lang_store = {
 
 Upload a <a href="https://www.google.com/search?q=reference+sheet+art" target="_blank">reference sheet</a> of a character, then RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character.
 
-You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The content you provide is only used for RefSheet Chat to understand the character and talk to you, and will not be used for other purposes. You can [run the program on your own computer](https://refsheet.chat/local) without Internet to ensure privacy.
+You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The content you provide is only used for RefSheet Chat to understand the character and talk to you, and will not be used for other purposes. You can <a href="https://refsheet.chat/local" target="_blank">run the program on your own computer</a> without Internet to ensure privacy.
 
 How will RefSheet Chat understand your character? Have a try!""",
         "title_pyinstaller": """
@@ -109,7 +109,7 @@ How will RefSheet Chat understand your character? Have a try!""",
         
 “一图胜千言”——提供一张<a href="https://www.bing.com/images/search?q=%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A%E5%9B%BE" target="_blank">角色设定图</a>（reference sheet），RefSheet Chat 即会理解和“脑补”设定图中的信息，并以这位角色的身份与您对话。
 
-您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您提供的内容仅用于 RefSheet Chat 理解角色并与您对话，不会另做他用。您可以[在自己的电脑上离线运行该程序](https://refsheet.chat/local)以确保隐私。
+您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您提供的内容仅用于 RefSheet Chat 理解角色并与您对话，不会另做他用。您可以<a href="https://refsheet.chat/local" target="_blank">在自己的电脑上离线运行该程序</a>以确保隐私。
 
 RefSheet Chat 将如何理解您的角色呢？试试看！""",
         "title_pyinstaller": """
