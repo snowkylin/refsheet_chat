@@ -6,16 +6,18 @@ import os
 import base64
 from openai import OpenAI
 
-default_img = None
-default_engine = "api"
-default_base_url = "https://openrouter.ai/api/v1"
-default_api_model = "google/gemma-3-27b-it"
 
-model_id = "google/gemma-3-4b-it"
 huggingface_spaces = "HUGGINGFACE_SPACES" in os.environ and os.environ['HUGGINGFACE_SPACES'] == "1"
 local = "LOCAL" in os.environ and os.environ['LOCAL'] == "1"
+pyinstaller = "PYINSTALLER" in os.environ and os.environ['PYINSTALLER'] == "1"
 
-if huggingface_spaces or local:
+default_img = None
+default_engine = "local" if pyinstaller else "api"
+default_base_url = "https://openrouter.ai/api/v1"
+default_api_model = "google/gemma-3-27b-it"
+model_id = "models--google--gemma-3-4b-it/snapshots/dbd91bbaf64a0e591f4340ce8b66fd1dba9ab6bd" if pyinstaller else "google/gemma-3-4b-it"
+
+if huggingface_spaces or local or pyinstaller:
     from transformers import AutoProcessor, Gemma3ForConditionalGeneration, TextIteratorStreamer
     import torch
     from threading import Thread
@@ -54,13 +56,21 @@ lang_store = {
 <span style='float: right'><iframe src="https://ghbtns.com/github-btn.html?user=snowkylin&repo=refsheet_chat&type=star&count=true" frameborder="0" scrolling="0" width="80" height="20" title="GitHub"></span></iframe>
 </h1>
 
-Upload a [reference sheet](https://www.google.com/search?q=reference+sheet+art) of a character, then RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character.
+Upload a <a href="https://www.google.com/search?q=reference+sheet+art" target="_blank">reference sheet</a> of a character, then RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character.
 
-You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The content you provide is only used for RefSheet Chat to understand the character and talk to you, and will not be used for other purposes. You can [run the program on your own computer](https://github.com/snowkylin/refsheet_chat) without Internet to ensure privacy.
+You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The content you provide is only used for RefSheet Chat to understand the character and talk to you, and will not be used for other purposes. You can [run the program on your own computer](https://refsheet.chat/local) without Internet to ensure privacy.
+
+How will RefSheet Chat understand your character? Have a try!""",
+        "title_pyinstaller": """
+<h1>RefSheet Chat -- Chat with a character via reference sheet!</h1>
+
+Upload a <a href="https://www.google.com/search?q=reference+sheet+art" target="_blank">reference sheet</a> of a character, then RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character.
+
+You can also add text descriptions and provide more reference pictures to help RefSheet Chat understand the character more accurately. The RefSheet Chat you are currently using is completely offline and does not upload any data to the Internet. If you want faster operation and better conversation quality, you can visit <a href="https://refsheet.chat" target="_blank">https://refsheet.chat</a> to use the online version.
 
 How will RefSheet Chat understand your character? Have a try!""",
         "upload": "Upload the reference sheet of the character here",
-        "prompt": "You are the character in the image, use %s. Use a conversational, oral tone. Do not mention the reference images directly. Start without confirmation.",
+        "prompt": "You are the character in the image, use %s. Use a conversational, oral tone. Do not mention the reference images. Start without confirmation.",
         "additional_info_prompt": "Additional info: ",
         "additional_reference_images_prompt": "Additional reference images of the character:",
         "description": "Description",
@@ -83,7 +93,7 @@ How will RefSheet Chat understand your character? Have a try!""",
         "ru": "Russian",
         "ar": "Arabic",
         "default_language": "en",
-        "author": "<p align='center'>Developed by <a href='https://github.com/snowkylin'>snowkylin</a>, powered by <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> open model</p>"
+        "author": "<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> is open-sourced, developed by <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a>, and powered by <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a></p>"
     },
     "zh": {
         "confirm": "确认",
@@ -97,13 +107,21 @@ How will RefSheet Chat understand your character? Have a try!""",
 <span style='float: right'><iframe src="https://ghbtns.com/github-btn.html?user=snowkylin&repo=refsheet_chat&type=star&count=true" frameborder="0" scrolling="0" width="80" height="20" title="GitHub"></span></iframe>
 </h1>
         
-“一图胜千言”——上传一张[角色设定图](https://www.bing.com/images/search?q=%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A%E5%9B%BE)（reference sheet），RefSheet Chat 即会理解和“脑补”设定图中的信息，并以这位角色的身份与您对话。
+“一图胜千言”——提供一张<a href="https://www.bing.com/images/search?q=%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A%E5%9B%BE" target="_blank">角色设定图</a>（reference sheet），RefSheet Chat 即会理解和“脑补”设定图中的信息，并以这位角色的身份与您对话。
 
-您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您提供的内容仅用于 RefSheet Chat 理解角色并与您对话，不会另做他用。您可以[在自己的电脑上离线运行该程序](https://github.com/snowkylin/refsheet_chat)以确保隐私。
+您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您提供的内容仅用于 RefSheet Chat 理解角色并与您对话，不会另做他用。您可以[在自己的电脑上离线运行该程序](https://refsheet.chat/local)以确保隐私。
+
+RefSheet Chat 将如何理解您的角色呢？试试看！""",
+        "title_pyinstaller": """
+<h1>RefSheet Chat——与设定图中的角色聊天！</h1>
+
+“一图胜千言”——提供一张<a href="https://www.bing.com/images/search?q=%E8%A7%92%E8%89%B2%E8%AE%BE%E5%AE%9A%E5%9B%BE" target="_blank">角色设定图</a>（reference sheet），RefSheet Chat 即会理解和“脑补”设定图中的信息，并以这位角色的身份与您对话。
+
+您也可以补充文字描述以及提供更多的参考图，以帮助 RefSheet Chat 更准确地理解角色。您当前使用的 RefSheet Chat 是完全离线运行的，不会将任何数据上传到互联网。如果希望获得更快的运行速度和对话质量，可以访问 <a href="https://refsheet.chat" target="_blank">https://refsheet.chat</a> 使用线上版本。
 
 RefSheet Chat 将如何理解您的角色呢？试试看！""",
         "upload": "在这里上传角色设定图",
-        "prompt": "你的身份是图中的角色，使用%s。使用聊天的，口语化的方式表达。不在回复中直接提及参考图。无需确认。",
+        "prompt": "你的身份是图中的角色，使用%s。使用聊天的，口语化的方式表达。不在回复中提及参考图的存在。无需确认。",
         "additional_info_prompt": "补充信息：",
         "additional_reference_images_prompt": "该角色的更多参考图：",
         "description": "额外角色设定",
@@ -126,7 +144,7 @@ RefSheet Chat 将如何理解您的角色呢？试试看！""",
         "ru": "俄语",
         "ar": "阿拉伯语",
         "default_language": "zh",
-        "author": """<p align='center'>由 <a href='https://github.com/snowkylin'>snowkylin</a> 开发，由开源的 <a href='https://blog.google/technology/developers/gemma-3/'>Gemma 3</a> 驱动</p>"""
+        "author": """<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> 是开源的，由 <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a> 开发，由开源的 <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a> 驱动</p>"""
     },
 }
 
@@ -228,7 +246,7 @@ def set_default_character_language(request: gr.Request):
 
 with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
     with Translate(lang_store) as lang:
-        gr.Markdown(_("title"), sanitize_html=False)
+        gr.Markdown(_("title_pyinstaller" if pyinstaller else "title"), sanitize_html=False)
         img = gr.Image(type="filepath", value=default_img, label=_("upload"), render=False)
         description = gr.TextArea(
             value=_("default_description"),
@@ -313,4 +331,8 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(prevent_thread_lock=True if pyinstaller else False)
+    if pyinstaller:
+        import webview
+        window = webview.create_window("RefSheet Chat", demo.local_url, maximized=True)
+        webview.start()
