@@ -11,9 +11,15 @@ license: mit
 short_description: Chat with a character via reference sheet!
 ---
 
-# Chat via Reference Sheet
+# RefSheet Chat -- Chat with a character via reference sheet
 
-A demo of [Gemma 3](https://blog.google/technology/developers/gemma-3/), demonstrating its excellent vision and multilingual capability.
+Upload a reference sheet of a character, RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character. RefSheet Chat can run locally to ensure privacy.
+
+Website: <https://refsheet.chat>
+
+Tutorial slide (in Chinese) can be found in <https://snowkylin.github.io/talks/>
+
+RefSheet Chat is a demo of [Gemma 3](https://blog.google/technology/developers/gemma-3/), demonstrating its excellent vision and multilingual capability.
 
 ## Environment Configuration
 
@@ -54,5 +60,52 @@ huggingface-cli login
 
 Copy-paste your access token and press enter.
 
+## Packing
+
+See <https://github.com/whitphx/gradio-pyinstaller-example> for more details
+
+Create a hook file `runtime_hook.py` including environment variables
+
+```python
+# This is the hook patching the `multiprocessing.freeze_support` function,
+# which we must import before calling `multiprocessing.freeze_support`.
+import PyInstaller.hooks.rthooks.pyi_rth_multiprocessing  # noqa: F401
+import os
+
+if __name__ == "__main__":
+    os.environ['PYINSTALLER'] = "1"
+    os.environ['HF_ENDPOINT'] = "https://hf-mirror.com" # optional, HF mirror site in China
+    os.environ['HF_TOKEN'] = "hf_XXXX"  # HF token that allow access to Gemma 3
+    # This is necessary to prevent an infinite app launch loop.
+    import multiprocessing
+    multiprocessing.freeze_support()
+```
+
+Then
+
+```commandline
+pyi-makespec --collect-data=gradio_client --collect-data=gradio --collect-data=safehttpx --collect-data=groovy --runtime-hook=./runtime_hook.py app.py
+```
+
+open `app.spec` and add
+```python
+a = Analysis(
+    ...,
+    module_collection_mode={
+        'gradio': 'py',  # Collect gradio package as source .py files
+    }
+}
+```
+then pack the environment
+```commandline
+pyinstaller --clean app.spec
+```
+finally copy the `win32ctypes` folder from your conda environment
+```commandline
+C:\Users\[Your-User-Name]\miniconda3\envs\[Your-Env-Name]\Lib\site-packages
+```
+to `dist/app/_internal`.
+
+Run `app.exe` in `dist/app` and it should work.
 
 
