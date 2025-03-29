@@ -228,6 +228,7 @@ def prefill_chatbot(img, description, more_imgs, character_language, engine, bas
 
 
 def response(message, history: list, img, description, more_imgs, character_language, engine, base_url, api_model, api_key):
+    print(history, message)
     history = [{"role": item["role"], "content": [{"type": "text", "text": item["content"]}]} for item in history]
     history = get_init_prompt(img, description, more_imgs, character_language) + history
     history.append(
@@ -237,7 +238,7 @@ def response(message, history: list, img, description, more_imgs, character_lang
         yield generated_text
 
 def set_default_character_language(request: gr.Request):
-    if request.headers["Accept-Language"].split(",")[0].lower().startswith("zh"):
+    if "Accept-Language" in request.headers and request.headers["Accept-Language"].split(",")[0].lower().startswith("zh"):
         default_language = lang_store['zh']['default_language']
     else:
         default_language = lang_store['und']['default_language']

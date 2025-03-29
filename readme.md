@@ -1,25 +1,12 @@
----
-title: Refsheet Chat
-emoji: 💬
-colorFrom: gray
-colorTo: green
-sdk: gradio
-sdk_version: 5.21.0
-app_file: app.py
-pinned: false
-license: mit
-short_description: Chat with a character via reference sheet!
----
-
-# RefSheet Chat -- Chat with a character via reference sheet
+# RefSheet Chat： Chat with a character via reference sheet
 
 Upload a reference sheet of a character, RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character. RefSheet Chat can run locally to ensure privacy.
 
 Website: <https://refsheet.chat>
 
-Tutorial slide (in Chinese) can be found in <https://snowkylin.github.io/talks/>
+A tutorial slide can be found in <https://snowkylin.github.io/talks/>
 
-RefSheet Chat is a demo of [Gemma 3](https://blog.google/technology/developers/gemma-3/), demonstrating its excellent vision and multilingual capability.
+RefSheet Chat is powered by [Gemma 3](https://blog.google/technology/developers/gemma-3/), demonstrating its excellent vision and multilingual capability.
 
 ## Environment Configuration
 
