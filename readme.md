@@ -1,4 +1,4 @@
-# RefSheet Chat： Chat with a character via reference sheet
+# RefSheet Chat: Chat with a character via reference sheet
 
 Upload a reference sheet of a character, RefSheet Chat will try to understand the character through the reference sheet, and talk to you as that character. RefSheet Chat can run locally to ensure privacy.
 
