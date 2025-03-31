@@ -93,7 +93,10 @@ How will RefSheet Chat understand your character? Have a try!""",
         "ru": "Russian",
         "ar": "Arabic",
         "default_language": "en",
-        "author": "<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> is open-sourced, developed by <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a>, and powered by <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a></p>"
+        "author": "<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> is open-sourced, developed by <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a>, and powered by <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a></p>",
+        "upload_image_before_chatting": "Please upload an image first and click \"Confirm\"",
+        "type_a_message": "Type a message...",
+        "no_image_uploaded": "No reference sheet uploaded!"
     },
     "zh": {
         "confirm": "确认",
@@ -144,7 +147,10 @@ RefSheet Chat 将如何理解您的角色呢？试试看！""",
         "ru": "俄语",
         "ar": "阿拉伯语",
         "default_language": "zh",
-        "author": """<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> 是开源的，由 <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a> 开发，由开源的 <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a> 驱动</p>"""
+        "author": """<p align='center'><a href='https://github.com/snowkylin/refsheet_chat' target='_blank'>RefSheet Chat</a> 是开源的，由 <a href='https://github.com/snowkylin' target='_blank'>snowkylin</a> 开发，由开源的 <a href='https://blog.google/technology/developers/gemma-3/' target='_blank'>Gemma 3</a> 驱动</p>""",
+        "upload_image_before_chatting": "请先上传角色设定图，并点击“确认”按钮",
+        "type_a_message": "在此输入消息",
+        "no_image_uploaded": "尚未上传设定图！"
     },
 }
 
@@ -219,6 +225,8 @@ def generate(history, engine, base_url, api_model, api_key):
 
 
 def prefill_chatbot(img, description, more_imgs, character_language, engine, base_url, api_model, api_key):
+    if img is None:
+        raise gr.Error(_("no_image_uploaded"), print_exception=False)
     history = get_init_prompt(img, description, more_imgs, character_language)
 
     ret = [{'role': 'assistant', 'content': ""}]
@@ -325,10 +333,12 @@ with gr.Blocks(title="Chat with a character via reference sheet!") as demo:
                     additional_inputs=[img, description, more_imgs, character_language, engine, base_url, api_model, api_key],
                 )
         confirm_btn.click(prefill_chatbot, [img, description, more_imgs, character_language, engine, base_url, api_model, api_key], chat.chatbot)\
-            .then(lambda x: x, chat.chatbot, chat.chatbot_value)
+            .success(lambda x: x, chat.chatbot, chat.chatbot_value)\
+            .success(lambda: gr.update(interactive=True, placeholder=_("type_a_message")), None, chat.textbox)
         gr.HTML(analytics_code)
         gr.Markdown(_("author"))
-    demo.load(set_default_character_language, None, character_language)
+        demo.load(set_default_character_language, None, character_language).then(
+            lambda: gr.update(interactive=False, placeholder=_("upload_image_before_chatting")), None, chat.textbox)
 
 
 if __name__ == "__main__":
